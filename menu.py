@@ -31,6 +31,8 @@ class Menu:
     def handle_click(self, pos):
         """Handle mouse click and return action"""
         if self.play_button.collidepoint(pos):
+            if self.music_on:
+                sounds.theme.play()  # Toca o som do clique                    sounds.tema.play()  # Toca o som do clique
 
             return 'play'
         elif self.quit_button.collidepoint(pos):
