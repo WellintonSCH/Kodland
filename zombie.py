@@ -13,8 +13,8 @@ class Zombie:
         self.vel_y = 0
         self.gravity = 0.4
         self.speed = speed
-        self.detection_range = 300
-        self.attack_distance = 70  # Adicionando o atributo que estava faltando
+        self.detection_range = 150
+        self.attack_distance = 50  # Adicionando o atributo que estava faltando
         self.attack_range = 50
         self.facing_right = True
         self.on_ground = False
@@ -72,28 +72,37 @@ class Zombie:
     def handle_movement(self, player):
         """Controla o movimento em direção ao jogador"""
         if self.attacking or self.attack_cooldown > 0:
-            self.vel_x = 0  # Para de se mover durante o ataque ou cooldown
+            self.vel_x = 0
             return
             
         dx = player.rect.x - self.rect.x
         distance_x = abs(dx)
         
-        if distance_x < self.detection_range:
-            # Se estiver muito perto, para de se mover
+        # Verifica se o jogador está no mesmo nível (com uma pequena margem)
+        is_player_on_same_level = abs(self.rect.bottom - player.rect.bottom) < 20
+        
+        if distance_x < self.detection_range and is_player_on_same_level:
             if distance_x < self.attack_distance:
                 self.vel_x = 0
                 self.state = "idle"
             else:
                 self.state = "walking"
-                if dx > 0:  # Jogador à direita
+                if dx > 0:
                     self.vel_x = self.speed
                     self.facing_right = True
-                else:  # Jogador à esquerda
+                else:
                     self.vel_x = -self.speed
                     self.facing_right = False
         else:
             self.state = "idle"
             self.vel_x = 0
+
+    def can_hit(self, player):
+        """Verifica se o jogador está no alcance e no mesmo nível"""
+        in_range_x = abs(self.rect.centerx - player.rect.centerx) < self.attack_range
+        # Margem de 20 pixels para considerar "mesmo nível"
+        in_range_y = abs(self.rect.bottom - player.rect.bottom) < 20
+        return in_range_x and in_range_y
 
     def apply_physics(self):
         """Aplica física e gravidade"""
@@ -151,11 +160,6 @@ class Zombie:
         else:
             self.attacking = False
 
-    def can_hit(self, player):
-        """Verifica se o jogador está no alcance"""
-        in_range_x = abs(self.rect.centerx - player.rect.centerx) < self.attack_range
-        in_range_y = abs(self.rect.centery - player.rect.centery) < 60
-        return in_range_x and in_range_y
 
     def take_damage(self, amount):
         """Processa dano recebido"""
