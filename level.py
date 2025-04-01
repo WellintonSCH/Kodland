@@ -19,20 +19,20 @@ class Level:
     def create_platforms(self):
 
         platforms = [
-            # Plataformas base (mantidas altas)
-            pygame.Rect(150, 650, 250, 20),   # 1ª plataforma (y=650)
-            pygame.Rect(500, 550, 250, 20),   # 2ª plataforma (+100px)
-            pygame.Rect(850, 450, 250, 20),   # 3ª plataforma (+100px)
+            # Plataformas base 
+            pygame.Rect(150, 650, 250, 20),   
+            pygame.Rect(500, 550, 250, 20),   
+            pygame.Rect(850, 450, 250, 20),  
             
-            # Plataformas intermediárias (altura reduzida)
-            pygame.Rect(200, 350, 200, 20),   # 4ª plataforma (y=350, era 300)
-            pygame.Rect(550, 250, 200, 20),   # 5ª plataforma (y=250, era 200)
+            # Plataformas intermediárias
+            pygame.Rect(200, 350, 200, 20),
+            pygame.Rect(550, 250, 200, 20), 
             
-            # Plataformas superiores (mais acessíveis)
-            pygame.Rect(900, 180, 200, 20),   # 6ª plataforma (y=180, era 100)
+            # Plataformas superiores
+            pygame.Rect(900, 180, 200, 20),
             
-            # Plataforma móvel (ajustada proporcionalmente)
-            pygame.Rect(600, 120, 100, 15),   # 7ª plataforma (y=120, era 50)
+            # Plataforma móvel
+            pygame.Rect(600, 120, 100, 15),
         ]
         return platforms
     
@@ -78,7 +78,7 @@ class Level:
         enemy_count = random.randint(3, 6)  # Entre 3 e 6 inimigos
         
         for _ in range(enemy_count):
-            # Escolhe uma plataforma aleatória (exceto o chão principal)
+            # Escolhe uma plataforma aleatória 
             spawnable_platforms = [p for p in self.platforms if p.y < self.height - 100]
             
             if spawnable_platforms:
@@ -89,7 +89,7 @@ class Level:
                     platform.left + 30, 
                     platform.right - 30
                 )
-                spawn_y = platform.top - 30  # 30 pixels acima da plataforma
+                spawn_y = platform.top - 30
                 
                 # Cria tipos diferentes de zumbis
                 enemy_type = random.choice(["normal", "strong", "fast"])
@@ -113,13 +113,13 @@ class Level:
             if enemy.health <= 0:
                 self.enemies.remove(enemy)
         
-        # Aplica gravidade aos inimigos
+
         self.apply_gravity(self.enemies)
         
-        # Verifica colisões com zonas perigosas (opcional)
+  
         self.check_danger_collisions(player)
         
-        # Verifica coleta de itens (opcional)
+    
         self.check_collectibles(player)
 
     def apply_gravity(self, enemies):
@@ -140,11 +140,11 @@ class Level:
         """Verifica se o jogador tocou em áreas perigosas"""
         for danger in self.danger_zones:
             if player.rect.colliderect(danger):
-                player.take_damage(5)  # Dano contínuo
+                player.take_damage(5)  
 
     def check_collectibles(self, player):
         """Verifica se o jogador coletou itens"""
         for item in self.collectibles[:]:
             if player.rect.colliderect(item):
                 self.collectibles.remove(item)
-                player.score += 10  # Ou outro benefício
+                player.score += 10  

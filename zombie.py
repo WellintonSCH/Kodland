@@ -1,5 +1,6 @@
 from pgzero.actor import Actor
 from pygame import Rect
+from pgzero.loaders import sounds
 
 class Zombie:
     def __init__(self, name, health, damage, x, y, speed=2):
@@ -14,7 +15,7 @@ class Zombie:
         self.gravity = 0.4
         self.speed = speed
         self.detection_range = 150
-        self.attack_distance = 50  # Adicionando o atributo que estava faltando
+        self.attack_distance = 50
         self.attack_range = 50
         self.facing_right = True
         self.on_ground = False
@@ -33,23 +34,27 @@ class Zombie:
         self.animation_time = 0
         self.animation_speed = 0.15
 
+        # Flags para controle de som
+        self.has_played_attack_sound = False
+        self.has_played_detect_sound = False
+
     def setup_animations(self):
         """Configura todos os frames de animação"""
         base_path = 'enemy/zombies/male_'
         
-        # Ataque (2 frames)
+        # Ataque
         self.attack_r_frames = [f'{base_path}r/attack{i}' for i in range(1, 3)]
         self.attack_l_frames = [f'{base_path}l/attack{i}' for i in range(1, 3)]
         
-        # Caminhada (10 frames)
+        # Caminhada
         self.walk_r_frames = [f'{base_path}r/walk{i}' for i in range(1, 11)]
         self.walk_l_frames = [f'{base_path}l/walk{i}' for i in range(1, 11)]
         
-        # Idle (1 frame)
+        # Idle
         self.idle_r_frames = [f'{base_path}r/idle1']
         self.idle_l_frames = [f'{base_path}l/idle1']
         
-        # Morte (1 frame)
+        # Morte
         self.death_r_frames = [f'{base_path}r/dead1']
         self.death_l_frames = [f'{base_path}l/dead1']
 
@@ -78,10 +83,15 @@ class Zombie:
         dx = player.rect.x - self.rect.x
         distance_x = abs(dx)
         
-        # Verifica se o jogador está no mesmo nível (com uma pequena margem)
+        # Verifica se o jogador está no mesmo nível
         is_player_on_same_level = abs(self.rect.bottom - player.rect.bottom) < 20
         
         if distance_x < self.detection_range and is_player_on_same_level:
+
+            if self.state != "walking" and not self.has_played_detect_sound:
+                sounds.zombie_detect.play()
+                self.has_played_detect_sound = True
+            
             if distance_x < self.attack_distance:
                 self.vel_x = 0
                 self.state = "idle"
@@ -96,11 +106,12 @@ class Zombie:
         else:
             self.state = "idle"
             self.vel_x = 0
+            self.has_played_detect_sound = False 
 
     def can_hit(self, player):
         """Verifica se o jogador está no alcance e no mesmo nível"""
         in_range_x = abs(self.rect.centerx - player.rect.centerx) < self.attack_range
-        # Margem de 20 pixels para considerar "mesmo nível"
+
         in_range_y = abs(self.rect.bottom - player.rect.bottom) < 20
         return in_range_x and in_range_y
 
@@ -145,21 +156,27 @@ class Zombie:
             
         if self.can_hit(player):
             if not self.attacking:
-                # Começa o ataque
+   
                 self.attacking = True
                 self.state = "attacking"
-                self.attack_delay = 0.5  # Tempo de preparação
+                self.attack_delay = 0.5  #
+                self.has_played_attack_sound = False 
             else:
-                # Durante o ataque
+
                 self.attack_delay -= 1/60
+                if self.attack_delay <= 0.3 and not self.has_played_attack_sound:
+  
+                    sounds.zombie_attack.play()
+                    self.has_played_attack_sound = True
+                
                 if self.attack_delay <= 0:
-                    # Executa o ataque
+    
                     player.take_damage(self.damage)
-                    self.attack_cooldown = 1.5  # Cooldown após o ataque
+                    self.attack_cooldown = 1.5 
                     self.attacking = False
         else:
             self.attacking = False
-
+            self.has_played_attack_sound = False 
 
     def take_damage(self, amount):
         """Processa dano recebido"""

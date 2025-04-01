@@ -38,7 +38,7 @@ class Player:
         base_path = 'player/knight_{}/'
         directions = ['r', 'l']
         
-        # Cria dinamicamente os paths das animações
+
         for direction in directions:
             setattr(self, f'walk_{direction}_frames', [f'{base_path.format(direction)}run{i}' for i in range(1, 11)])
             setattr(self, f'attack_{direction}_frames', [f'{base_path.format(direction)}attack{i}' for i in range(1, 3)])
@@ -58,7 +58,7 @@ class Player:
         self.actor.pos = self.rect.center
         
         # Verifica se caiu fora da tela
-        if self.rect.y > 600:  # Limite arbitrário
+        if self.rect.y > 600: 
             self.fell_off = True
 
     def _handle_input(self):
@@ -100,40 +100,39 @@ class Player:
         """Detecta e resolve colisões com plataformas"""
         self.on_ground = False
         
-        # Armazena a posição original para restauração se necessário
+       
         original_x = self.rect.x
         original_y = self.rect.y
         
         for platform in platforms:
             if self.rect.colliderect(platform):
-                # Calcula a sobreposição em ambos os eixos
+                
                 overlap_x = min(self.rect.right, platform.right) - max(self.rect.left, platform.left)
                 overlap_y = min(self.rect.bottom, platform.bottom) - max(self.rect.top, platform.top)
                 
-                # Determina o eixo de menor sobreposição (colisão lateral ou vertical)
-                if overlap_x < overlap_y:  # Colisão lateral
-                    if self.vel_x > 0:  # Movendo para direita
+             
+                if overlap_x < overlap_y: 
+                    if self.vel_x > 0:  
                         self.rect.right = platform.left
-                    elif self.vel_x < 0:  # Movendo para esquerda
+                    elif self.vel_x < 0: 
                         self.rect.left = platform.right
                     self.vel_x = 0
-                else:  # Colisão vertical
-                    if self.vel_y > 0:  # Caindo (colisão com topo da plataforma)
+                else:  
+                    if self.vel_y > 0: 
                         self.rect.bottom = platform.top
                         self.vel_y = 0
                         self.on_ground = True
                         if self.state == "jumping":
                             self.state = "idle"
-                    elif self.vel_y < 0:  # Subindo (colisão com base da plataforma)
+                    elif self.vel_y < 0:
                         self.rect.top = platform.bottom
                         self.vel_y = 0
-                
-                # Verifica se houve um teleporte significativo
+
                 if abs(self.rect.x - original_x) > self.actor.width or abs(self.rect.y - original_y) > self.actor.height:
-                    # Se o movimento foi muito grande, restaura a posição original
+
                     self.rect.x = original_x
                     self.rect.y = original_y
-                    break  # Sai do loop para evitar múltiplas colisões problemáticas
+                    break
 
     def _update_combat(self, enemies):
         """Atualiza lógica de combate"""
@@ -144,8 +143,7 @@ class Player:
                     if enemy.health <= 0:
                         self.score += 50
             self.attack_cooldown = 0.5
-        
-        # Atualiza temporizadores
+
         if self.attack_cooldown > 0:
             self.attack_cooldown -= 1/60
         if self.invincible:
@@ -155,13 +153,11 @@ class Player:
 
     def _can_hit(self, enemy):
         """Verifica se o inimigo está no alcance do ataque"""
-        # Verifica distância horizontal
+
         in_range_x = abs(self.rect.centerx - enemy.rect.centerx) < self.attack_range
-        
-        # Verifica distância vertical (altura similar)
+
         in_range_y = abs(self.rect.centery - enemy.rect.centery) < 50
         
-        # Verifica se está virado na direção correta
         facing_correct = (self.facing_right and enemy.rect.centerx > self.rect.centerx) or \
                     (not self.facing_right and enemy.rect.centerx < self.rect.centerx)
         
